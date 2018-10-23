@@ -1,0 +1,311 @@
+<!DOCTYPE html>
+
+<html lang="en">
+
+<head>
+    
+<meta charset="utf-8">
+  <meta name="description" content="Interactive Form Builder">
+  <meta name="keywords" content="HTML,CSS,IndexedDB,JavaScript">
+  <meta name="author" content="Jacek Sobanski">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Form Builder</title>    
+</head>
+
+<style>
+    * {
+        margin: 0;
+        padding: 0;
+        box-sizing: border-box;
+    }
+
+    html,
+    body {
+        font-size: 20px;
+        font-family: sans-serif;
+        font-weight: 500;
+    }
+
+    /*----Header style----*/
+
+    h1 {
+        margin: 30px 5px 50px 30px;
+        position: relative;
+
+    }
+
+    .addInputButton {
+        font-size: 15px;
+        height: 35px;
+        width: 70px;
+        margin: 10px 10px;
+        left: 1%;
+        top: 10%;
+        position: fixed;
+        margin-right: 10px;
+    }
+
+    /*---Blank Div style---*/
+
+    .myDiv {
+
+        background-color: #f5f5f5;
+        border: 1px solid #989898;
+        margin: 30px 10px 10px 100px;
+        width: 640px;
+
+        position: relative;
+        overflow: hidden;
+        height: 1%;
+    }
+
+    /*--- Div buttons, add input and delete styles---*/
+
+    .divButtons {
+        background: rgba(198, 198, 198, 0.48);
+        width: 120px;
+        height: 35px;
+        position: relative;
+        top: 70%;
+        left: 54%;
+        margin: 20px 0;
+        display: inline-block;
+    }
+
+
+
+    /*---Select style---*/
+
+    #mySelect {
+        position: relative;
+        width: 400px;
+        bottom: 70px;
+        margin: 3px 5px 3px 5px;
+        padding: 2px 2px 2px 2px;
+        font-size: 19px;
+
+    }
+
+    /*---Text field style---*/
+
+    #paraQ {
+        float: left;
+        position: relative;
+        font-size: 19px;
+        padding: 2px 2px 2px 2px;
+    }
+
+    #txtF {
+        float: right;
+        position: relative;
+        width: 350px;
+        height: 30px;
+        right: 10%;
+        bottom: 10%;
+        font-size: 19px;
+        padding: 2px 2px 2px 2px;
+        float: right;
+    }
+
+    /*---UX Buttons---*/
+
+    .menuBtns {
+        font-size: 15px;
+        height: 35px;
+        width: 110px;
+        position: relative;
+        left: 100px;
+        top: 20px;
+        margin-left: 1px;
+    }
+</style>
+
+<body>
+
+    <div id="blankPage">
+        <h1>Form Builder</h1>
+        <button onclick="startUX()" class="addInputButton">Add input</button>
+    </div>
+
+
+
+
+    <div id="optionsForms">
+        <button onclick="myFunction()" class="menuBtns">Create Div</button>
+        <button onclick="createRadio()" class="menuBtns">Create Radio</button>
+        <div id="selectDiv">
+            <button onclick="createNumber()" class="menuBtns">Create Number</button> </div>
+    </div>
+    <script src="script.js">
+    </script>
+
+
+
+
+
+    <script>
+        // Connecting to IndexedDB
+        var db;
+        var request = window.indexedDB.open("Questions", 1);
+
+        request.onerror = function(event) {
+            console.log("error: ");
+        };
+
+        request.onsuccess = function(event) {
+            db = request.result;
+            console.log("success: " + db);
+        };
+
+        request.onupgradeneeded = function(event) {
+            var db = event.target.result;
+            var objectStore = db.createObjectStore("question", {
+                keyPath: "id"
+            });
+        }
+
+        function add(dataText) {
+
+            for (var i = 0; i < dataText.length; i++) {
+                var request = db.transaction(["question"], "readwrite")
+                    .objectStore("question").add({
+                        id: dataText[i][0]['id'],
+                        id: dataText[i][1]['question']
+                    });
+            }
+
+
+            request.onsuccess = function(event) {
+                console.log('Data has been added to database');
+            };
+
+            request.onerror = function(event) {
+                console.log('hmmm :/');
+            }
+        }
+
+
+
+        // Functions connected with all input options
+
+        var increment = 0;
+
+        // This function hides form builder options
+        function hideUX() {
+            document.getElementById("optionsForms").style.display = "none";
+        }
+
+        hideUX();
+
+        // This function runs UX
+        function startUX() {
+            document.getElementById("optionsForms").style.display = "inline-flex";
+        }
+
+        //This function creates new Div
+        function myFunction() {
+            increment++;
+            var div1 = document.createElement("div");
+            div1.setAttribute('id', 'myDiv' + increment);
+            div1.setAttribute('class', 'myDiv');
+            document.body.appendChild(div1);
+            // Create button add sub input
+            var btnAdd = document.createElement("button");
+            var txtNode = document.createTextNode("Add Sub-Input");
+            btnAdd.setAttribute('id', 'btnAdd' + increment);
+            btnAdd.setAttribute('class', 'divButtons');
+            btnAdd.setAttribute('onclick', 'createSubTextField()');
+
+            btnAdd.appendChild(txtNode);
+            div1.appendChild(btnAdd);
+            // Create button delete
+            var btnDelete = document.createElement("button");
+            var txtNode2 = document.createTextNode("Delete");
+            btnDelete.setAttribute('id', 'btnDelete' + increment);
+            btnDelete.setAttribute('class', 'divButtons');
+            btnDelete.setAttribute('onclick', 'deleteThis()');
+            btnDelete.appendChild(txtNode2);
+            div1.appendChild(btnDelete);
+
+        }
+        // Create text input element along with paragraph 
+        function createSubTextField() {
+            var inputContainer = document.createElement("div");
+
+            inputContainer.setAttribute('class', 'inputContainer');
+            event.target.parentNode.insertBefore(inputContainer, event.target);
+
+            var para = document.createElement("p");
+            var t = document.createTextNode("This is a paragraph.");
+            para.setAttribute('id', 'paraQ');
+            para.appendChild(t);
+
+            var textField = document.createElement("input");
+            textField.setAttribute('id', 'txtF');
+            inputContainer.appendChild(para);
+            inputContainer.appendChild(textField);
+
+            var divs = document.getElementsByTagName("input");
+            var inputTextList = [];
+            var counterId = increment;
+            for (var i = 0; i < divs.length; i++) {
+                if (divs[i].value.length > 0) {
+                    inputTextList.push([{
+                        "id": counterId++
+                    }, {
+                        "question": divs[i].value
+                    }]);
+                }
+            }
+
+            if (inputTextList.length > 0) {
+                add(inputTextList);
+
+            }
+
+        }
+
+        //This function deletes new Div
+        function deleteThis() {
+            event.target.parentNode.remove();
+            increment--;
+        }
+
+
+        //This function creates new Select list  with array of 3 elements 
+
+        function createNumber() {
+
+            var myDiv = document.getElementById("myDiv" + increment);
+
+
+            var array = ["Greater Than", "Equals", "Less than"];
+
+
+            var selectList = document.createElement("select");
+            selectList.setAttribute("id", "mySelect");
+            myDiv.appendChild(selectList);
+
+
+            for (var i = 0; i < array.length; i++) {
+                var option = document.createElement("option");
+                option.setAttribute("value", array[i]);
+                option.text = array[i];
+                selectList.appendChild(option);
+            }
+
+
+        }
+        //This function creates new radio form, doesn't work yet
+        function createRadio() {
+            
+            var radio1 = document.createElement("INPUT");
+            radio1.input.type="radio";
+            radio1.setAttribute('id', 'radio');
+            document.body.appendChild(radio1);
+
+        }
+    </script>
+</body>
+
+</html>
