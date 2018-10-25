@@ -17,7 +17,7 @@ Functions:<br>
 To do:
 <br>
 -Create new radio type input<br>
--Types of imput based on users choice<br>
+-Types of input fields based on users choice<br>
 -Styling<br>
 
 
